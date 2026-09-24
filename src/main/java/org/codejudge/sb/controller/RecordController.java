@@ -1,15 +1,9 @@
 package org.codejudge.sb.controller;
 
-import java.net.URI;
-import java.util.Arrays;
 import java.util.Collections;
-import java.util.LinkedHashMap;
 import java.util.Map;
-import javax.validation.Valid;
-import org.codejudge.sb.model.RecordPayload;
 import org.codejudge.sb.service.RecordService;
 import org.springframework.dao.DataAccessException;
-import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,22 +14,8 @@ public class RecordController {
     private final RecordService records;
     public RecordController(RecordService records) { this.records = records; }
 
-    @PostMapping
-    public ResponseEntity<Map<String, Object>> create(@Valid @RequestBody RecordPayload record) {
-        records.create(record);
-        Map<String, Object> response = new LinkedHashMap<>();
-        response.put("id", record.id);
-        response.put("storedIn", Arrays.asList("mariadb", "mongodb"));
-        return ResponseEntity.created(URI.create("/api/records/" + record.id)).body(response);
-    }
-
     @GetMapping("/{id}")
     public Map<String, Object> find(@PathVariable String id) { return records.find(id); }
-
-    @ExceptionHandler(DuplicateKeyException.class)
-    public ResponseEntity<Map<String, String>> duplicate(DuplicateKeyException error) {
-        return ResponseEntity.status(HttpStatus.CONFLICT).body(Collections.singletonMap("error", "ID already exists in a database. Use GET to inspect it or choose a new ID."));
-    }
 
     @ExceptionHandler(DataAccessException.class)
     public ResponseEntity<Map<String, String>> databaseError(DataAccessException error) {
