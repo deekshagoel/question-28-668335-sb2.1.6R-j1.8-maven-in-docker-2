@@ -1,33 +1,21 @@
-# Spring Boot Maven
+# Spring Boot API with MariaDB and MongoDB
 
-PROJECT START STEPS:
+This project runs in the BarRaiser Debian 12 cloud IDE. From the repository directory, set up Java 8, Maven, MariaDB, MongoDB, build the JAR, start the app, and verify both database connections with one command:
 
-    Pre-requisites:
-    1. Java must be installed
-    2. Install maven module (https://maven.apache.org/install.html).
+    bash setup.sh
 
-    Steps:
-    1. To run this application, do the following:
-        1.a. Go to the project root directory.
-        1.b. Run the following commands in the terminal/command line to build the app:
-            - mvn clean install
-        1.c. Run the following command(s) in the terminal/command line to run the app:
-            - java -jar ./target/spring-boot-in-docker.jar
-    
-    CLOUD-IDE SETUP STEPS(follow the below steps in case you are using the Cloud IDE instead of your Local IDE):
-	1. Please run the below commands from the project root to setup MySQL and MongoDB in this workspace:
-		- chmod 0755 ./database-setup.sh
-		- bash ./database-setup.sh
-	2. In case you want to connect to MySQL or MongoDB, kindly use the following credentials in your application:
-		2.a. MySQL
-			- host: localhost
-			- port: 3306
-			- username: root
-			- password: admin
-			- database: db
-		2.b. MongoDB
-			- host: localhost
-			- port: 27017
-			- username: root
-			- password: admin
-			- database: db
+The setup can be run again after a room restart. It keeps existing database data and checks that POST and GET work through both databases. The API listens on port 8081 because the IDE uses 8080. The app runs in the background; its log is at `/tmp/project-api.log`. The IDE may not retain database files after a room rebuild, so export data you need to keep.
+
+To write one record into both databases:
+
+    curl -i -X POST http://127.0.0.1:8081/api/records \
+      -H 'Content-Type: application/json' \
+      -d '{"id":"demo-001","name":"Deeksha","message":"Hello from both databases"}'
+
+To fetch the MariaDB and MongoDB copies by their shared primary key:
+
+    curl -i http://127.0.0.1:8081/api/records/demo-001
+
+POST returns 201, GET returns 200 with a `mariadb` object and a `mongodb` object. Use a different ID for each POST; a duplicate returns 409. The automated checks can be rerun with `bash verify-api.sh`.
+
+See [README-databases.md](README-databases.md) for the database setup details, account settings, restart instructions, and limitations of writing to two independent stores.
